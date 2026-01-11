@@ -18,6 +18,16 @@ const passInput = document.getElementById('pass-input');
 const passScreen = document.getElementById('password-screen');
 const errorMsg = document.getElementById('error-msg');
 
+// CHECK SESSION ON LOAD: If already unlocked, skip password
+if (sessionStorage.getItem('vault_unlocked') === 'true') {
+    passScreen.style.display = 'none';
+    setTimeout(() => {
+        loader.classList.add('fade-out');
+        loadMedia();
+        updateCounter();
+    }, 500);
+}
+
 function updateCounter() {
     const start = new Date(START_DATE);
     const now = new Date();
@@ -61,10 +71,9 @@ function filterMedia(type) {
             btn.classList.add('active');
         }
     });
-    renderGallery(); // Call render instead of reloading JSON every time
+    renderGallery();
 }
 
-// CHANGED: This function now fetches the data from your JSON file
 async function loadMedia() {
     try {
         const response = await fetch('media.json');
@@ -75,7 +84,6 @@ async function loadMedia() {
     }
 }
 
-// CHANGED: This function handles the actual display logic
 function renderGallery() {
     grid.innerHTML = "";
     const filteredMedia = currentFilter === 'all' ? media : media.filter(item => item.type === currentFilter);
@@ -171,11 +179,14 @@ lightbox.onclick = (e) => {
 passInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         if (passInput.value === SECRET_KEY) {
+            // SET SESSION STORAGE
+            sessionStorage.setItem('vault_unlocked', 'true');
+            
             passScreen.classList.add('unlocked');
             setTimeout(() => {
                 passScreen.style.display = 'none';
                 loader.classList.add('fade-out');
-                loadMedia(); // Initial fetch from JSON
+                loadMedia(); 
                 updateCounter();
             }, 1000);
         } else {
