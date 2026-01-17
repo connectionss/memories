@@ -2,78 +2,190 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Vault | Our Story</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Our Private World</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { 
+            --bg: #050205; 
+            --romantic: #ff4d6d;
+            --soft-white: rgba(255, 255, 255, 0.9);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; cursor: none !important; }
+
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'serif', -apple-system, system-ui, sans-serif;
+            height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+
+        /* --- ROMANTIC SOFT CURSOR --- */
+        #cursor-glow {
+            position: fixed; width: 150px; height: 150px;
+            background: radial-gradient(circle, rgba(255, 77, 109, 0.15) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none; z-index: 1;
+            transform: translate(-50%, -50%);
+        }
+
+        #cursor-point {
+            position: fixed; width: 6px; height: 6px; background: var(--soft-white);
+            border-radius: 50%; pointer-events: none; z-index: 10000;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px #fff;
+        }
+
+        /* --- BACKGROUND PARTICLES --- */
+        .stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+        
+        @keyframes drift {
+            from { transform: translateY(0) rotate(0deg); opacity: 0; }
+            50% { opacity: 0.5; }
+            to { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .petal {
+            position: absolute; background: #fff; border-radius: 50%;
+            opacity: 0; animation: drift linear infinite;
+        }
+
+        /* --- LAYOUT --- */
+        .container { position: relative; z-index: 10; text-align: center; width: 90%; max-width: 400px; }
+
+        .logo-box {
+            width: 80px; height: 80px; margin: 0 auto 35px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--romantic);
+            filter: drop-shadow(0 0 15px rgba(255, 77, 109, 0.6));
+            animation: heartbeat 2s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 1; }
+        }
+
+        h1 { font-family: 'Times New Roman', serif; font-style: italic; font-size: 40px; font-weight: 400; letter-spacing: 1px; margin-bottom: 10px; }
+        p { color: #888; font-size: 11px; font-weight: 400; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 50px; }
+
+        .nav-stack { display: flex; flex-direction: column; gap: 16px; }
+
+        .nav-btn {
+            position: relative; text-decoration: none; padding: 22px; border-radius: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: space-between;
+            padding-left: 35px; padding-right: 35px;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .btn-text { text-align: left; }
+        .btn-text h2 { font-size: 17px; color: #ccc; font-weight: 400; letter-spacing: 1px; transition: 0.4s; }
+        .btn-text span { display: block; font-size: 8px; color: var(--romantic); letter-spacing: 2px; margin-bottom: 4px; }
+
+        .nav-btn:hover {
+            background: rgba(255, 77, 109, 0.05);
+            border-color: rgba(255, 77, 109, 0.3);
+            transform: translateY(-5px);
+        }
+        .nav-btn:hover h2 { color: #fff; letter-spacing: 1.5px; }
+        
+        .icon-wrap { color: #555; transition: 0.4s; }
+        .nav-btn:hover .icon-wrap { color: var(--romantic); transform: scale(1.1); }
+
+        @media (max-width: 768px) {
+            #cursor-glow, #cursor-point { display: none; }
+            * { cursor: auto !important; }
+        }
+    </style>
 </head>
 <body>
-    <div id="password-screen">
-        <div class="login-box">
-            <span class="gate-status">SECURE ACCESS REQUIRED</span>
-            <input type="password" id="pass-input" placeholder="ENTER ACCESS KEY..." autofocus>
-            <p id="error-msg">INVALID KEY. ACCESS DENIED.</p>
-            <p class="hint">HINT: THE DATE WE FIRST MET (DDMMYYYY)</p>
+
+    <div id="cursor-point"></div>
+    <div id="cursor-glow"></div>
+    <div class="stars" id="petal-container"></div>
+
+    <div class="container">
+        <div class="logo-box">
+            <i data-lucide="heart" fill="currentColor" size="45"></i>
         </div>
-    </div>
-
-    <div id="loader">
-        <div class="loader-content">
-            <div class="scanner"></div>
-            <p>INITIALIZING VAULT...</p>
-            <div class="progress-bar">
-                <div class="progress"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="cursor-dot"></div>
-    <div class="cursor-outline"></div>
-
-    <div id="lightbox">
-        <div id="lightbox-video-box"></div>
-        <img src="" alt="Vault Preview" id="lightbox-img">
         
-        <p id="lightbox-caption" style="margin: 20px 0; font-size: 12px; letter-spacing: 2px; text-align: center; color: #fff; max-width: 80%;"></p>
-
-        <div class="lightbox-controls">
-            <a id="download-btn" href="#">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                <span>SAVE TO DEVICE</span>
+        <h1>The Archive of Us</h1>
+        <p>A Private Journey</p>
+        
+        <div class="nav-stack">
+            <a href="start.html" class="nav-btn">
+                <div class="btn-text">
+                    <span>SECURITY</span>
+                    <h2>Private Vault & Surprises</h2>
+                </div>
+                <div class="icon-wrap"><i data-lucide="key" size="20"></i></div>
             </a>
-            <p id="close-hint">CLICK ANYWHERE TO CLOSE</p>
+            
+            <a href="love.html" class="nav-btn">
+                <div class="btn-text">
+                    <span>HANDWRITTEN</span>
+                    <h2>Love Letter</h2>
+                </div>
+                <div class="icon-wrap"><i data-lucide="pen-tool" size="20"></i></div>
+            </a>
+
+            <a href="gallery.html" class="nav-btn">
+                <div class="btn-text">
+                    <span>VISUALS</span>
+                    <h2>Memory Gallery</h2>
+                </div>
+                <div class="icon-wrap"><i data-lucide="camera" size="20"></i></div>
+            </a>
         </div>
     </div>
 
-    <nav>
-        <span class="logo">OUR.STORY</span>
-        <span class="status">MY WHOLE WORLD / ACTIVE</span>
-    </nav>
+    <script>
+        lucide.createIcons();
 
-    <header>
-        <h1 class="title">Everything.</h1>
-        <p class="count">MEMORIES ARCHIVE</p>
-        <div id="love-counter">
-            <span id="days">00</span>D : <span id="hours">00</span>H : <span id="mins">00</span>M : <span id="secs">00</span>S
-        </div>
-    </header>
+        // Smooth Cursor Movement
+        const dot = document.getElementById('cursor-point');
+        const glow = document.getElementById('cursor-glow');
+        let mouseX = 0, mouseY = 0, glowX = 0, glowY = 0;
 
-    <div class="filter-tabs">
-        <button class="tab-btn active" onclick="filterMedia('all')">EVERYTHING</button>
-        <button class="tab-btn" onclick="filterMedia('image')">PHOTOS</button>
-        <button class="tab-btn" onclick="filterMedia('video')">VIDEOS</button>
-    </div>
+        window.addEventListener('mousemove', e => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            dot.style.left = `${mouseX}px`;
+            dot.style.top = `${mouseY}px`;
+        });
 
-    <main class="grid" id="photo-grid"></main>
+        function animate() {
+            glowX += (mouseX - glowX) * 0.08;
+            glowY += (mouseY - glowY) * 0.08;
+            glow.style.left = `${glowX}px`;
+            glow.style.top = `${glowY}px`;
+            requestAnimationFrame(animate);
+        }
+        animate();
 
-    <footer>
-        <p>© 2026 - ALWAYS & FOREVER</p>
-    </footer>
+        // Background Petals
+        const container = document.getElementById('petal-container');
+        for (let i = 0; i < 25; i++) {
+            const petal = document.createElement('div');
+            petal.className = 'petal';
+            const size = Math.random() * 3 + 2 + 'px';
+            petal.style.width = size; petal.style.height = size;
+            petal.style.left = Math.random() * 100 + 'vw';
+            petal.style.top = Math.random() * 100 + 'vh';
+            petal.style.animationDuration = Math.random() * 10 + 10 + 's';
+            petal.style.animationDelay = Math.random() * 5 + 's';
+            container.appendChild(petal);
+        }
 
-    <script src="script.js"></script>
+        // Hover Detection for Cursor
+        const btns = document.querySelectorAll('.nav-btn');
+        btns.forEach(btn => {
+            btn.addEventListener('mouseenter', () => document.body.classList.add('is-hovering'));
+            btn.addEventListener('mouseleave', () => document.body.classList.remove('is-hovering'));
+        });
+    </script>
 </body>
-</html>     
+</html>
