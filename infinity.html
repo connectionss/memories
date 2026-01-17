@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Brown View</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;300;600&display=swap');
+
+        body { margin: 0; background: #000; overflow: hidden; font-family: 'Inter', sans-serif; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        
+        #video {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; transform: scaleX(-1);
+            opacity: 0; transition: opacity 4s ease; z-index: 1;
+        }
+
+        /* Warm Golden Brown Aura */
+        #aura {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            box-shadow: inset 0 0 180px rgba(153, 101, 21, 0.6);
+            pointer-events: none; z-index: 5; opacity: 0; transition: 4s;
+        }
+
+        #ui-container { position: relative; z-index: 100; text-align: center; width: 90%; transition: opacity 1.5s; }
+
+        h1 { font-weight: 100; letter-spacing: 8px; font-size: 1.1rem; margin-bottom: 40px; line-height: 1.8; text-transform: uppercase; color: #d4af37; }
+
+        button {
+            background: none; border: 1px solid rgba(212, 175, 55, 0.5);
+            color: #d4af37; padding: 18px 40px; letter-spacing: 10px;
+            cursor: pointer; text-transform: uppercase; font-size: 10px;
+            transition: 0.8s; backdrop-filter: blur(10px);
+        }
+
+        button:hover { background: #d4af37; color: #000; box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+
+        .word-particle {
+            position: fixed; color: #fdf5e6; font-weight: 300;
+            letter-spacing: 3px; pointer-events: none;
+            z-index: 50; text-shadow: 0 0 10px rgba(153, 101, 21, 0.8);
+            white-space: nowrap; animation: floatUp 7s forwards ease-out;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) scale(0.8); opacity: 0; }
+            15% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { transform: translateY(-20vh) scale(1.1); opacity: 0; }
+        }
+
+        #blush-text {
+            position: fixed; bottom: 8%; width: 100%; text-align: center;
+            opacity: 0; transition: 5s; font-size: 16px; letter-spacing: 5px;
+            z-index: 60; text-shadow: 0 0 20px #000; font-weight: 100;
+            font-style: italic; color: #d4af37;
+        }
+    </style>
+</head>
+<body>
+
+    <video id="video" autoplay playsinline></video>
+    <div id="aura"></div>
+
+    <div id="ui-container">
+        <h1 id="title">I searched everywhere for the most beautiful view in the world...</h1>
+        <button id="btn" onclick="revealView()">Click to See</button>
+    </div>
+
+    <div id="blush-text">"Golden brown, texture like sun..."</div>
+
+    <audio id="bgm" loop>
+        <source src="goldenbrown.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const specialWords = [
+            "YOU ARE BREATHTAKING", "TEXTURE LIKE SUN", "YOUR SMILE MELTS ME", "PURE PERFECTION", "MY FAVORITE VIEW",
+            "UNREAL BEAUTY", "YOUR ENERGY IS HEALING", "THE WAY YOU ARE", "SIMPLY GORGEOUS", "MY EVERYTHING",
+            "I LOVE YOUR EYES", "YOU ARE MY SUNSHINE", "BEST THING THAT HAPPENED TO ME", "YOUR LAUGH IS MUSIC", "SO PROUD OF YOU",
+            "YOU ARE A BLESSING", "THE PRETTIEST GIRL EVER", "I'M SO LUCKY", "YOU ARE MY HOME", "MY HEART BEATS FOR YOU",
+            "YOU ARE IRREPLACEABLE", "A WORK OF ART", "YOUR KINDNESS IS RARE", "I ADORE YOU", "YOU ARE MY DREAM",
+            "THANK YOU FOR BEING YOU", "YOU MAKE ME BETTER", "YOUR RADIANCE IS UNMATCHED", "I'M FOREVER YOURS", "YOU ARE MY PEACE",
+            "NO ONE COMPARES TO YOU", "YOU ARE MAGICAL", "MY SOULMATE", "I CHOOSE YOU EVERY DAY", "YOU ARE SO SMART",
+            "I LOVE YOUR SPIRIT", "YOU ARE CAPTIVATING", "MY FAVORITE HELLO", "MY HARDEST GOODBYE", "YOU ARE STUNNING",
+            "YOUR STRENGTH INSPIRES ME", "YOU ARE MY FAVORITE PERSON", "I LOVE OUR MEMORIES", "YOU ARE MY WORLD", "KEEP SHINING",
+            "YOU ARE ENOUGH", "YOU ARE MORE THAN ENOUGH", "I'M CRAZY ABOUT YOU", "YOUR VOICE IS SOOTHING", "YOU ARE A STAR",
+            "MY LOVE FOR YOU GROWS DAILY", "YOU ARE AN ANGEL", "YOU HAVE MY HEART", "YOU ARE SO BRAVE", "I CHERISH YOU",
+            "YOU ARE MY HAPPINESS", "I LOVE YOUR STYLE", "YOU ARE GENUINE", "YOU ARE SO PRETTY IT HURTS", "I'M ADDICTED TO YOU",
+            "YOU ARE MY BETTER HALF", "I LOVE YOUR MIND", "YOU ARE FEARLESS", "YOU ARE MY TREASURE", "YOU ARE DIVINE",
+            "YOU ARE THE REASON I SMILE", "I BELIEVE IN YOU", "YOU ARE MY GUIDING LIGHT", "I'M HONORED TO KNOW YOU", "YOU ARE EXQUISITE",
+            "I LOVE HOW YOU THINK", "YOU ARE MY VALENTINE FOREVER", "YOU ARE SO SWEET", "I'M SMITTEN BY YOU", "YOU ARE REMARKABLE",
+            "YOU ARE MY HEART'S DESIRE", "I LOVE YOUR TOUCH", "YOU ARE SO ELEGANT", "YOU ARE MY DESTINY", "I'M ALWAYS HERE FOR YOU",
+            "YOU ARE ONE IN A BILLION", "I LOVE YOUR ENERGY", "YOU ARE MY SAFE PLACE", "YOU ARE SO TALENTED", "I'M PROUD TO BE YOURS",
+            "YOU ARE MY INSPIRATION", "I LOVE YOUR AMBITION", "YOU ARE SO VIBRANT", "YOU ARE MY FAVORITE STORY", "I'M LOST IN YOU",
+            "YOU ARE RADIANT", "I LOVE YOUR VIBE", "YOU ARE MY EVERYTHING AND MORE", "YOU ARE SO COMPASSIONATE", "I'M ALWAYS ON YOUR SIDE",
+            "YOU ARE MY FAVORITE DESTINATION", "I LOVE YOUR SOUL", "YOU ARE THE BEST PART OF MY DAY", "YOU ARE SIMPLY THE BEST", "I LOVE YOU INFINITELY"
+        ];
+
+        async function revealView() {
+            const video = document.getElementById('video');
+            const ui = document.getElementById('ui-container');
+            const blush = document.getElementById('blush-text');
+            const aura = document.getElementById('aura');
+            const music = document.getElementById('bgm');
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                video.srcObject = stream;
+                
+                // Play the music
+                music.play();
+                
+                ui.style.opacity = '0';
+                
+                setTimeout(() => {
+                    ui.style.display = 'none';
+                    video.style.opacity = '1';
+                    aura.style.opacity = '1';
+                    startCompliments();
+                    setTimeout(() => { blush.style.opacity = '1'; }, 4000);
+                }, 1500);
+            } catch (err) {
+                alert("The camera is the only way to see the beauty! ❤️");
+            }
+        }
+
+        function startCompliments() {
+            setInterval(() => {
+                const word = document.createElement('div');
+                word.className = 'word-particle';
+                word.innerText = specialWords[Math.floor(Math.random() * specialWords.length)];
+                word.style.left = Math.random() * 80 + 10 + "%";
+                word.style.fontSize = (Math.random() * 10 + 12) + "px";
+                document.body.appendChild(word);
+                setTimeout(() => { word.remove(); }, 7000);
+            }, 500); 
+        }
+    </script>
+</body>
+</html>

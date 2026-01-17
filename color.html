@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Color of You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        body, html { 
+            width: 100%; height: 100%; 
+            background: #000; 
+            overflow: hidden; 
+            cursor: none; /* Hides cursor to use the lens instead */
+        }
+
+        .back-link { 
+            position: fixed; top: 30px; left: 30px; 
+            color: rgba(255,255,255,0.3); text-decoration: none; 
+            font-size: 10px; letter-spacing: 3px; z-index: 100; 
+        }
+
+        .container { position: relative; width: 100vw; height: 100vh; }
+
+        /* Layer 1: The Grayscale/Dark version (Life without her) */
+        .layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+        }
+
+        #grayscale-layer {
+            /* REPLACE 'her-photo.jpg' with your actual image file name */
+            background-image: url('her-photo.jpg'); 
+            filter: grayscale(100%) brightness(30%);
+            z-index: 1;
+        }
+
+        /* Layer 2: The Vibrant Color version (Life with her) */
+        #color-layer {
+            /* USE THE SAME IMAGE HERE */
+            background-image: url('her-photo.jpg'); 
+            z-index: 2;
+            clip-path: circle(0px at center); /* This is the lens that moves */
+            transition: clip-path 0.1s ease-out;
+        }
+
+        /* The Message */
+        .content {
+            position: absolute; bottom: 8%; width: 100%; text-align: center;
+            z-index: 10; pointer-events: none;
+        }
+
+        h1 { font-size: 10px; letter-spacing: 8px; color: rgba(255,255,255,0.5); text-transform: uppercase; margin-bottom: 10px; }
+        p { font-size: 18px; color: #fff; opacity: 0.9; padding: 0 20px; }
+
+        .hint {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: rgba(255,255,255,0.2); font-size: 12px; letter-spacing: 4px; z-index: 5;
+        }
+
+        @media (max-width: 600px) { p { font-size: 14px; } }
+    </style>
+</head>
+<body>
+
+    <a href="surprises.html" class="back-link">← EXIT GALLERY</a>
+
+    <div class="container" id="container">
+        <div class="hint" id="hint">MOVE YOUR FINGER</div>
+        
+        <div id="grayscale-layer" class="layer"></div>
+        
+        <div id="color-layer" class="layer"></div>
+
+        <div class="content">
+            <h1>Perspective Shift</h1>
+            <p>"I never realized how gray my world was until you brought the color back into it."</p>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('container');
+        const colorLayer = document.getElementById('color-layer');
+        const hint = document.getElementById('hint');
+
+        function moveLens(e) {
+            hint.style.opacity = '0'; // Hide the hint once they move
+            
+            // Get position for mouse or touch
+            const x = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            const y = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            
+            // Update the "hole" in the grayscale layer
+            colorLayer.style.clipPath = `circle(120px at ${x}px ${y}px)`;
+        }
+
+        // Mouse movement for laptops
+        window.addEventListener('mousemove', moveLens);
+        
+        // Touch movement for mobile
+        window.addEventListener('touchmove', (e) => {
+            moveLens(e);
+            e.preventDefault(); // Prevent scrolling while "painting"
+        }, { passive: false });
+    </script>
+</body>
+</html>

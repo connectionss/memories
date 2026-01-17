@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Love Letter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #2c0a0a; /* Dark deep red like the image background */
+            --paper-base: #d9a86a;
+            --ink: #2b1b17;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: radial-gradient(circle, #4d1414 0%, #1a0505 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* --- THE PAPER CONTAINER --- */
+        .parchment {
+            position: relative;
+            width: 100%;
+            max-width: 550px;
+            background: var(--paper-base);
+            background-image: 
+                url('https://www.transparenttextures.com/patterns/paper-fibers.png'),
+                linear-gradient(to right, rgba(0,0,0,0.05), transparent 5%, transparent 95%, rgba(0,0,0,0.05));
+            padding: 80px 60px;
+            
+            /* The Torn Edge Effect */
+            clip-path: polygon(
+                0% 5%, 5% 2%, 10% 5%, 15% 0%, 25% 4%, 35% 1%, 45% 4%, 55% 0%, 65% 3%, 75% 0%, 85% 4%, 95% 1%, 100% 5%,
+                98% 15%, 100% 25%, 97% 35%, 100% 45%, 98% 55%, 100% 65%, 97% 75%, 100% 85%, 98% 95%, 95% 100%,
+                85% 97%, 75% 100%, 65% 96%, 55% 100%, 45% 97%, 35% 100%, 25% 96%, 15% 100%, 5% 97%, 0% 95%,
+                2% 85%, 0% 75%, 3% 65%, 0% 55%, 2% 45%, 0% 35%, 3% 25%, 0% 15%
+            );
+
+            /* The Charred/Burned Shadow Effect */
+            box-shadow: 
+                0 0 50px rgba(0,0,0,0.5),
+                inset 0 0 60px #4b2e1b,
+                inset 0 0 20px #000;
+            
+            filter: drop-shadow(10px 10px 20px rgba(0,0,0,0.8));
+            transition: transform 0.5s ease;
+        }
+
+        /* Red Swirl Decoration from the image */
+        .parchment::before {
+            content: '';
+            position: absolute;
+            top: 20px; right: 20px;
+            width: 150px; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/skulls.png'); /* placeholder for texture */
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        /* Adding the red heart flourishes */
+        .heart-decor {
+            position: absolute;
+            top: 40px; right: 30px;
+            font-size: 100px;
+            color: #b32a2a;
+            opacity: 0.2;
+            font-family: 'Great Vibes', cursive;
+            user-select: none;
+        }
+
+        /* --- THE TEXT --- */
+        .text-body {
+            font-family: 'Dancing Script', cursive;
+            color: var(--ink);
+            font-size: 24px;
+            line-height: 1.6;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+        }
+
+        .text-body p {
+            margin-bottom: 20px;
+        }
+
+        /* --- NAVIGATION --- */
+        .back-btn {
+            position: fixed; top: 20px; left: 20px;
+            color: #fff; text-decoration: none;
+            font-family: sans-serif; font-size: 12px;
+            letter-spacing: 2px; text-transform: uppercase;
+            padding: 10px 20px; background: rgba(0,0,0,0.3);
+            border-radius: 50px; border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
+        }
+        .back-btn:hover { background: #ff4d6d; }
+
+        @media (max-width: 600px) {
+            .parchment { padding: 50px 30px; }
+            .text-body { font-size: 19px; }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">← Back</a>
+
+    <div class="parchment">
+        <div class="heart-decor">❤</div>
+        
+        <div class="text-body">
+            <p>Falling in love with you was not planned, but it turned out to be the most perfect thing.</p>
+            
+            <p>I see truth in your intentions & my eternity in your heart. I love how you straighten out your thoughts & place them over a sheet of flowers, unraveled.</p>
+            
+            <p>The knitted galaxies in your eyes, I want to explore them, see them turn into clusters and black holes.</p>
+            
+            <p>You're meant to be held learned, to be loved slowly. And gradually, these poetry & a harmonious chime in you, wanting to be heard, and I, my love, will hear all of it.</p>
+        </div>
+    </div>
+
+</body>
+</html>

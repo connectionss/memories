@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault Architect | Pro Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --card-bg: #0d0d0d;
+            --accent: #ffffff;
+            --border: #222;
+            --text-dim: #666;
+            --glow: rgba(255, 255, 255, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg); color: var(--accent); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; overflow-x: hidden; }
+
+        .generator-card {
+            width: 100%; max-width: 1100px; background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 24px; padding: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 10px; letter-spacing: 8px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
+        .header p { font-size: 24px; font-weight: 600; letter-spacing: -1px; }
+
+        /* --- PREVIEW PANE --- */
+        .group-label { font-size: 9px; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 12px; display: block; text-transform: uppercase; }
+        
+        .preview-pane { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); 
+            gap: 12px; 
+            max-height: 220px; 
+            overflow-y: auto; 
+            background: #000; 
+            padding: 20px; 
+            border-radius: 16px; 
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+        .preview-pane img { 
+            width: 100%; aspect-ratio: 1/1; object-fit: cover; 
+            border-radius: 8px; border: 1px solid #222; transition: 0.3s;
+        }
+        .preview-pane img:hover { transform: scale(1.1); border-color: #fff; z-index: 10; }
+        .preview-pane p { font-size: 11px; color: #444; grid-column: 1/-1; text-align: center; padding: 20px; }
+
+        /* --- INPUT AREA --- */
+        .input-section { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
+        @media (max-width: 850px) { .input-section { grid-template-columns: 1fr; } }
+
+        textarea {
+            width: 100%; height: 350px; background: #000; border: 1px solid var(--border);
+            border-radius: 16px; padding: 20px; color: #fff; font-family: 'Courier New', monospace;
+            font-size: 13px; resize: none; outline: none; transition: 0.3s;
+        }
+        textarea:focus { border-color: var(--accent); box-shadow: 0 0 20px var(--glow); }
+
+        /* --- CONTROLS --- */
+        .controls { display: flex; flex-direction: column; gap: 20px; }
+        
+        .custom-select-wrapper { position: relative; width: 100%; user-select: none; }
+        .custom-select {
+            background: #000; border: 1px solid var(--border); border-radius: 12px;
+            padding: 16px; font-size: 11px; letter-spacing: 2px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .custom-select-options {
+            position: absolute; top: 110%; left: 0; right: 0; background: #111;
+            border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+            display: none; z-index: 100;
+        }
+        .custom-select-options.show { display: block; }
+        .option { padding: 14px 20px; font-size: 11px; color: #888; transition: 0.2s; cursor: pointer; }
+        .option:hover { background: #fff; color: #000; }
+        .option.selected { color: #fff; background: #1a1a1a; }
+
+        input[type="text"] {
+            width: 100%; padding: 16px; background: #000; border: 1px solid var(--border);
+            border-radius: 12px; color: #fff; font-size: 12px; outline: none;
+        }
+
+        button {
+            width: 100%; padding: 16px; background: transparent; border: 1px solid var(--border);
+            border-radius: 12px; color: #fff; cursor: pointer; font-size: 11px;
+            letter-spacing: 2px; text-transform: uppercase; transition: 0.3s;
+        }
+        button.primary { background: var(--accent); color: #000; border: none; font-weight: 600; }
+        button.primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
+        button.secondary:hover { border-color: #fff; background: rgba(255,255,255,0.05); }
+
+        #output {
+            margin-top: 30px; background: #080808; border: 1px solid var(--border);
+            border-radius: 16px; padding: 20px; max-height: 200px; overflow-y: auto;
+            font-family: monospace; font-size: 11px; color: #555; white-space: pre-wrap;
+        }
+
+        .stats-badge { font-size: 9px; color: #444; margin-top: 10px; text-align: center; letter-spacing: 1px; }
+
+        /* --- TOAST --- */
+        #toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: #fff; color: #000; padding: 12px 30px; border-radius: 50px;
+            font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+            transition: 0.6s cubic-bezier(0.19, 1, 0.22, 1); z-index: 1000;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+    <div id="toast">Copied to Clipboard</div>
+
+    <div class="generator-card">
+        <div class="header">
+            <h1>Engine v4.5</h1>
+            <p>Vault Data Architect</p>
+        </div>
+
+        <span class="group-label">Visual Audit Pane</span>
+        <div class="preview-pane" id="previewPane"><p>Awaiting media links for visual confirmation...</p></div>
+
+        <div class="input-section">
+            <div>
+                <span class="group-label">Source Links (ImgBB or Drive)</span>
+                <textarea id="inputLinks" placeholder="Paste links here (one per line)..." oninput="updatePreview()"></textarea>
+            </div>
+
+            <div class="controls">
+                <div>
+                    <span class="group-label">Media Protocol</span>
+                    <div class="custom-select-wrapper">
+                        <div class="custom-select" id="selected-type" onclick="toggleOptions()">
+                            <span>STATIC IMAGE (IMGBB)</span>
+                            <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <div class="custom-select-options" id="select-options">
+                            <div class="option selected" onclick="selectOption('image', 'STATIC IMAGE (IMGBB)')">STATIC IMAGE (IMGBB)</div>
+                            <div class="option" onclick="selectOption('video', 'GOOGLE DRIVE VIDEO')">GOOGLE DRIVE VIDEO</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="group-label">Batch Caption</span>
+                    <input type="text" id="batchCaption" placeholder="Optional (e.g. Graduation 2024)">
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <button class="primary" onclick="processLinks()">Generate Manifest</button>
+                    <button class="secondary" style="margin-top: 12px;" onclick="copyCode()">Copy JSON Batch</button>
+                    <button class="secondary" style="margin-top: 12px; border-color: #311;" onclick="clearAll()">Reset Engine</button>
+                </div>
+
+                <div id="stats" class="stats-badge">READY: 0 ITEMS DETECTED</div>
+            </div>
+        </div>
+
+        <div id="output-container" style="margin-top: 30px;">
+            <span class="group-label">Generated JSON Manifest</span>
+            <div id="output">// Standing by...</div>
+        </div>
+    </div>
+
+    <script>
+        let currentType = 'image';
+
+        function toggleOptions() { document.getElementById('select-options').classList.toggle('show'); }
+
+        function selectOption(val, label) {
+            currentType = val;
+            document.querySelector('#selected-type span').innerText = label;
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            event.target.classList.add('selected');
+            document.getElementById('select-options').classList.remove('show');
+            updatePreview();
+        }
+
+        window.onclick = function(e) { if (!e.target.closest('.custom-select-wrapper')) document.getElementById('select-options').classList.remove('show'); }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        function updatePreview() {
+            const input = document.getElementById('inputLinks').value.trim();
+            const lines = [...new Set(input.split('\n').map(l => l.trim()).filter(l => l !== ""))];
+            const pane = document.getElementById('previewPane');
+            const stats = document.getElementById('stats');
+            
+            stats.innerText = `READY: ${lines.length} UNIQUE ITEMS DETECTED`;
+            pane.innerHTML = "";
+
+            if(lines.length === 0) { pane.innerHTML = "<p>Awaiting media links for visual confirmation...</p>"; return; }
+
+            if(currentType === 'image') {
+                lines.slice(0, 40).forEach(url => {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.onerror = () => img.style.display = 'none';
+                    pane.appendChild(img);
+                });
+            } else {
+                pane.innerHTML = "<p>Video Preview is disabled to save performance. Check IDs below.</p>";
+            }
+        }
+
+        function processLinks() {
+            const input = document.getElementById('inputLinks').value.trim();
+            const caption = document.getElementById('batchCaption').value.trim();
+            const lines = [...new Set(input.split('\n').map(l => l.trim()).filter(l => l !== ""))];
+            let results = [];
+
+            lines.forEach(line => {
+                if (currentType === 'video') {
+                    const match = line.match(/\/d\/([^/]+)/);
+                    if (match && match[1]) {
+                        const id = match[1];
+                        results.push(`    {
+        "type": "video",
+        "url": "https://drive.google.com/file/d/${id}/preview",
+        "downloadUrl": "https://drive.google.com/uc?export=download&id=${id}",
+        "caption": "${caption}"
+    }`);
+                    }
+                } else {
+                    results.push(`    {
+        "type": "image",
+        "url": "${line}",
+        "caption": "${caption}"
+    }`);
+                }
+            });
+
+            document.getElementById('output').innerText = results.join(',\n');
+            if(results.length > 0) showToast("MANIFEST GENERATED");
+        }
+
+        function copyCode() {
+            const code = document.getElementById('output').innerText;
+            if(code.startsWith("//")) return;
+            navigator.clipboard.writeText(code).then(() => showToast("COPIED TO CLIPBOARD"));
+        }
+
+        function clearAll() {
+            document.getElementById('inputLinks').value = "";
+            document.getElementById('batchCaption').value = "";
+            updatePreview();
+            document.getElementById('output').innerText = "// Standing by...";
+            showToast("ENGINE RESET");
+        }
+    </script>
+</body>
+</html>

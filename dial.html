@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The Memory Dial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; background: #000; overflow: hidden; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: 'Poppins', sans-serif; }
+        .back-link { position: fixed; top: 30px; left: 30px; color: #444; text-decoration: none; font-size: 10px; letter-spacing: 3px; transition: 0.3s; z-index: 100; }
+        .back-link:hover { color: #fff; }
+        #container { width: 90vw; height: 85vh; overflow: hidden; border-radius: 30px; position: relative; border: 1px solid #1a1a1a; box-shadow: 0 50px 100px rgba(0,0,0,0.8); }
+        #hero-img { position: absolute; width: 115%; height: 115%; top: -7.5%; left: -7.5%; object-fit: cover; filter: grayscale(30%) brightness(0.6); transition: 0.15s ease-out; }
+        .overlay { position: absolute; bottom: 60px; left: 60px; color: #fff; }
+        h1 { letter-spacing: 12px; text-transform: uppercase; font-size: 16px; margin: 0; font-weight: 600; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <a href="surprises.html" class="back-link">← RETURN TO HUB</a>
+    <div id="container">
+        <img src="https://i.ibb.co/PZMmJcYY/Gemini-Generated-Image-50t0m050t0m050t0.png" id="hero-img">
+        <div class="overlay"><h1>PERSPECTIVE</h1></div>
+    </div>
+    <script>
+        const img = document.getElementById('hero-img');
+        document.addEventListener('mousemove', (e) => {
+            let x = (window.innerWidth / 2 - e.pageX) / 40;
+            let y = (window.innerHeight / 2 - e.pageY) / 40;
+            img.style.transform = `translateX(${x}px) translateY(${y}px) scale(1.05)`;
+        });
+    </script>
+</body>
+</html>

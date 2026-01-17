@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Vault | Our Story</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+    <div id="password-screen">
+        <div class="login-box">
+            <span class="gate-status">SECURE ACCESS REQUIRED</span>
+            <input type="password" id="pass-input" placeholder="ENTER ACCESS KEY..." autofocus>
+            <p id="error-msg">INVALID KEY. ACCESS DENIED.</p>
+            <p class="hint">HINT: THE DATE WE FIRST MET (DDMMYYYY)</p>
+        </div>
+    </div>
+
+    <div id="loader">
+        <div class="loader-content">
+            <div class="scanner"></div>
+            <p>INITIALIZING VAULT...</p>
+            <div class="progress-bar">
+                <div class="progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <div id="lightbox">
+        <div id="lightbox-video-box"></div>
+        <img src="" alt="Vault Preview" id="lightbox-img">
+
+        <p id="lightbox-caption"
+            style="margin: 20px 0; font-size: 12px; letter-spacing: 2px; text-align: center; color: #fff; max-width: 80%;">
+        </p>
+
+        <div class="lightbox-controls">
+            <a id="download-btn" href="#">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>SAVE TO DEVICE</span>
+            </a>
+            <p id="close-hint">CLICK ANYWHERE TO CLOSE</p>
+        </div>
+    </div>
+
+    <nav>
+        <span class="logo">OUR.STORY</span>
+        <span class="status">MY WHOLE WORLD / ACTIVE</span>
+        <button id="shuffle-nav-btn" onclick="shuffleGallery(true)"
+            style="background: none; border: 1px solid #333; color: var(--gray); font-size: 10px; padding: 8px 15px; border-radius: 20px; cursor: pointer; letter-spacing: 2px;">SHUFFLE
+            ARCHIVE</button>
+    </nav>
+
+    <header>
+        <h1 class="title">Everything.</h1>
+        <p class="count">MEMORIES ARCHIVE</p>
+        <div id="vault-stats"
+            style="font-size: 9px; letter-spacing: 2px; color: var(--gray); margin-top: 10px; line-height: 2;">
+            <span id="photo-count">0</span> PHOTOS / <span id="video-count">0</span> VIDEOS <br>
+            <span style="color: #444;">ESTIMATED FOOTPRINT:</span> <span id="vault-size">0</span> GB
+        </div>
+        <div id="love-counter">
+            <span id="days">00</span>D : <span id="hours">00</span>H : <span id="mins">00</span>M : <span
+                id="secs">00</span>S
+        </div>
+        <div style="text-align: center; margin: 40px 0;">
+            <a href="surprises.html" class="surprise-btn">More Surprises</a>
+        </div>
+    </header>
+
+    <div class="filter-tabs">
+        <button class="tab-btn active" onclick="filterMedia('all')">EVERYTHING</button>
+        <button class="tab-btn" onclick="filterMedia('image')">PHOTOS</button>
+        <button class="tab-btn" onclick="filterMedia('video')">VIDEOS</button>
+    </div>
+
+    <main class="grid" id="photo-grid"></main>
+
+    <footer>
+        <p>© 2026 - ALWAYS & FOREVER</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

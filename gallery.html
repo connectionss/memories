@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vault | Instant Library</title>
+    <style>
+        :root {
+            --bg: #000;
+            --accent: #007AFF;
+            --card: #121212;
+            --border: #222;
+            --glass: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: -apple-system, system-ui, sans-serif;
+            overflow-x: hidden;
+            overscroll-behavior-y: contain;
+        }
+
+        /* --- PREMIUM LOCK SCREEN --- */
+        #vault-auth {
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.6s cubic-bezier(0.85, 0, 0.15, 1), opacity 0.4s ease;
+        }
+
+        .auth-container {
+            text-align: center;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .lock-status {
+            font-size: 13px;
+            font-weight: 600;
+            color: #888;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+        }
+
+        .pin-display {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 60px;
+        }
+
+        .dot {
+            width: 14px;
+            height: 14px;
+            border: 1.5px solid #444;
+            border-radius: 50%;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .dot.active {
+            background: #fff;
+            border-color: #fff;
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 0 20px;
+        }
+
+        .key {
+            aspect-ratio: 1/1;
+            border-radius: 50%;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .key span {
+            font-size: 10px;
+            letter-spacing: 1px;
+            color: #666;
+            font-weight: 700;
+            margin-top: -2px;
+        }
+
+        .key:active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(0.9);
+        }
+
+        .shake {
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translateX(-8px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(8px);
+            }
+        }
+
+        /* Message in a Bottle Popup */
+        #daily-note-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 6000;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .note-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px 30px;
+            border-radius: 28px;
+            text-align: center;
+            max-width: 340px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #daily-note-overlay.show {
+            display: flex;
+        }
+
+        #daily-note-overlay.show .note-card {
+            transform: scale(1);
+        }
+
+        .note-card h2 {
+            font-size: 12px;
+            color: var(--accent);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+        }
+
+        .note-card p {
+            font-size: 19px;
+            line-height: 1.6;
+            font-style: italic;
+            color: #fff;
+            margin-bottom: 35px;
+        }
+
+        .note-close {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* Security Flash */
+        #securityFlash {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #fff;
+            display: none;
+            pointer-events: none;
+        }
+
+        /* Premium Glass Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(30px) saturate(180%);
+            padding: 50px 25px 20px;
+            border-bottom: 0.5px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: -1.2px;
+            background: linear-gradient(to bottom, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats {
+            color: #555;
+            font-size: 11px;
+            font-weight: 700;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        /* Motion Blur Viewport */
+        #viewport {
+            margin-top: 140px;
+            position: relative;
+            width: 100%;
+            transition: filter 0.1s ease-out;
+            will-change: filter, transform;
+        }
+
+        .grid-item {
+            position: absolute;
+            overflow: hidden;
+            cursor: pointer;
+            padding: 2px;
+            perspective: 1000px;
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: var(--card);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .grid-item:active .card-inner {
+            transform: scale(0.92);
+        }
+
+        .grid-item img,
+        .grid-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Lightbox - Premium Setup */
+        #lightbox {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .lb-header {
+            padding: 50px 25px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 2001;
+        }
+
+        .lb-close {
+            color: var(--accent);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .lb-download {
+            background: rgba(255, 255, 255, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-right: 15px;
+        }
+
+        .lb-download:active {
+            transform: scale(0.9);
+            background: var(--accent);
+        }
+
+        .lb-download svg {
+            width: 20px;
+            height: 20px;
+            fill: #fff;
+        }
+
+        .lb-controls {
+            display: flex;
+            align-items: center;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(255, 255, 255, 0.95);
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 7000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        #lbIndex {
+            transition: transform 0.2s ease;
+            display: inline-block;
+        }
+
+        .pulse {
+            transform: scale(1.1);
+            color: #fff !important;
+        }
+
+        .lb-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .lb-content img,
+        .lb-content video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            user-select: none;
+            transition: transform 0.45s cubic-bezier(0.15, 0.9, 0.34, 1), opacity 0.3s ease;
+            position: absolute;
+            will-change: transform, opacity;
+        }
+
+        .smart-zoom {
+            transform: scale(3.5) !important;
+            cursor: zoom-out;
+        }
+
+        .slide-out-left {
+            transform: translateX(-100%) scale(0.85) !important;
+            opacity: 0 !important;
+        }
+
+        .slide-out-right {
+            transform: translateX(100%) scale(0.85) !important;
+            opacity: 0 !important;
+        }
+
+        .slide-in-from-right {
+            transform: translateX(100%) scale(0.85);
+            opacity: 0;
+        }
+
+        .slide-in-from-left {
+            transform: translateX(-100%) scale(0.85);
+            opacity: 0;
+        }
+
+        .lb-footer {
+            padding: 30px 25px 50px;
+            text-align: center;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+        }
+
+        .lb-caption {
+            font-size: 15px;
+            color: #888;
+            font-weight: 400;
+        }
+
+        .v-tag {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 800;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="securityFlash"></div>
+
+    <div id="vault-auth">
+        <div class="auth-container" id="authUI">
+            <div class="lock-status" id="lockLabel">Enter Passcode</div>
+            <div class="pin-display">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <div class="keypad">
+                <div class="key" onclick="pressKey('1')">1<span>&nbsp;</span></div>
+                <div class="key" onclick="pressKey('2')">2<span>ABC</span></div>
+                <div class="key" onclick="pressKey('3')">3<span>DEF</span></div>
+                <div class="key" onclick="pressKey('4')">4<span>GHI</span></div>
+                <div class="key" onclick="pressKey('5')">5<span>JKL</span></div>
+                <div class="key" onclick="pressKey('6')">6<span>MNO</span></div>
+                <div class="key" onclick="pressKey('7')">7<span>PQRS</span></div>
+                <div class="key" onclick="pressKey('8')">8<span>TUV</span></div>
+                <div class="key" onclick="pressKey('9')">9<span>WXYZ</span></div>
+                <div style="opacity:0"></div>
+                <div class="key" onclick="pressKey('0')">0<span>+</span></div>
+                <div class="key" onclick="pressKey('C')" style="font-size:14px; color:#ff453a;">Clear</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="daily-note-overlay">
+        <div class="note-card">
+            <h2>Message in a Bottle</h2>
+            <p id="dailyNoteText">I was just thinking about you...</p>
+            <button class="note-close" onclick="closeDailyNote()">Tap here if you read it cutu ❤️</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <h1>Library</h1>
+        <div class="stats" id="stats">Vault Locked</div>
+    </div>
+
+    <div id="viewport"></div>
+
+    <div id="lightbox">
+        <div class="lb-header">
+            <span id="lbIndex" style="font-size: 14px; font-weight: 600; color: #666;"></span>
+            <div class="lb-controls">
+                <button class="lb-download" onclick="downloadMedia()" title="Download">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                    </svg>
+                </button>
+                <button class="lb-close" onclick="closeLB()">Done</button>
+            </div>
+        </div>
+        <div class="lb-content" id="lbContent"></div>
+        <div class="lb-footer">
+            <div class="lb-caption" id="lbCaption"></div>
+        </div>
+    </div>
+
+    <div id="saveToast" class="toast">Saved to Device</div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const VAULT_PIN = "2404";
+        const START_DATE = "2024-01-01"; // Set your anniversary date here
+        const DAILY_MESSAGES = [
+            "I built this for you because I never want us to forget these moments.",
+            "You're my favorite person in every single one of these photos.",
+            "Thinking of you extra today. You are so loved.",
+            "Every day with you is a new favorite memory.",
+            "You are the best thing that ever happened to me."
+        ];
+
+        let inputPin = "";
+        let mediaData = [];
+        let currentIndex = 0;
+        const viewport = document.getElementById('viewport');
+        const colCount = 3;
+        let itemSize = window.innerWidth / colCount;
+        let lastScrollTop = 0;
+        let scrollTimeout;
+        let lastTap = 0;
+        let currentScale = 1;
+        let startDist = 0;
+
+        // --- AUTH LOGIC ---
+        function pressKey(num) {
+            if (num === 'C') { inputPin = ""; updateDots(); return; }
+            if (inputPin.length < 4) inputPin += num;
+            updateDots();
+            if (inputPin.length === 4) {
+                if (inputPin === VAULT_PIN) {
+                    const auth = document.getElementById('vault-auth');
+                    auth.style.opacity = "0";
+                    auth.style.transform = "scale(1.1)";
+                    setTimeout(() => {
+                        auth.style.display = 'none';
+                        loadVault();
+                    }, 500);
+                } else {
+                    const authUI = document.getElementById('authUI');
+                    authUI.classList.add('shake');
+                    setTimeout(() => { authUI.classList.remove('shake'); inputPin = ""; updateDots(); }, 400);
+                }
+            }
+        }
+
+        function updateDots() {
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, i) => dot.classList.toggle('active', i < inputPin.length));
+        }
+
+        // --- VAULT ENGINE ---
+        async function loadVault() {
+            try {
+                const response = await fetch('media.json');
+                mediaData = await response.json();
+                mediaData.reverse();
+
+                // Update Relationship Stats
+                const start = new Date(START_DATE);
+                const today = new Date();
+                const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+                document.getElementById('stats').innerHTML = `<span style="color:var(--accent)">${diffDays} DAYS TOGETHER</span> • ${mediaData.length} MEMORIES`;
+
+                initVirtualGrid();
+                setTimeout(showDailyNote, 600);
+            } catch (err) { console.error("Data Load Error"); }
+        }
+
+        // --- DAILY NOTE LOGIC ---
+        function showDailyNote() {
+            const overlay = document.getElementById('daily-note-overlay');
+            const textEl = document.getElementById('dailyNoteText');
+            const dayIndex = Math.floor(new Date() / 8.64e7);
+            textEl.innerText = DAILY_MESSAGES[dayIndex % DAILY_MESSAGES.length];
+            overlay.classList.add('show');
+        }
+
+        function closeDailyNote() {
+            document.getElementById('daily-note-overlay').classList.remove('show');
+        }
+
+        // --- PRIVACY PROTECTION (SCREENSHOTS) ---
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'PrintScreen' || (e.ctrlKey && e.key === 'p')) {
+                triggerPrivacyAlert();
+            }
+        });
+
+        function triggerPrivacyAlert() {
+            const flash = document.getElementById('securityFlash');
+            flash.style.display = 'block';
+            setTimeout(() => {
+                flash.style.display = 'none';
+                const toast = document.getElementById('saveToast');
+                toast.innerText = "Caught you! Our eyes only! 😉";
+                showToast();
+            }, 100);
+        }
+
+        // --- GRID LOGIC ---
+        function initVirtualGrid() {
+            viewport.style.height = (Math.ceil(mediaData.length / colCount) * itemSize) + 'px';
+            window.addEventListener('scroll', handleScrollEffects);
+            window.addEventListener('resize', () => {
+                itemSize = window.innerWidth / colCount;
+                viewport.style.height = (Math.ceil(mediaData.length / colCount) * itemSize) + 'px';
+                renderVisibleItems();
+            });
+            renderVisibleItems();
+        }
+
+        function handleScrollEffects() {
+            const currentScroll = window.scrollY;
+            const speed = Math.abs(currentScroll - lastScrollTop);
+            lastScrollTop = currentScroll;
+            const blurValue = Math.min(speed / 15, 4);
+            viewport.style.filter = `blur(${blurValue}px)`;
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => { viewport.style.filter = 'blur(0px)'; }, 100);
+            renderVisibleItems();
+        }
+
+        function renderVisibleItems() {
+            const scrollTop = window.scrollY;
+            const screenHeight = window.innerHeight;
+            const startRow = Math.max(0, Math.floor((scrollTop - 800) / itemSize));
+            const endRow = Math.min(Math.ceil(mediaData.length / colCount), Math.ceil((scrollTop + screenHeight + 800) / itemSize));
+            const startIndex = startRow * colCount;
+            const endIndex = Math.min(mediaData.length, endRow * colCount);
+
+            let html = '';
+            for (let i = startIndex; i < endIndex; i++) {
+                const item = mediaData[i];
+                const row = Math.floor(i / colCount);
+                const col = i % colCount;
+                const top = row * itemSize;
+                const left = col * (100 / colCount);
+                html += `
+                    <div class="grid-item" onclick="openLB(${i})"
+                         style="top: ${top}px; left: ${left}%; width: ${100 / colCount}%; height: ${itemSize}px;">
+                        <div class="card-inner">
+                            ${item.type === 'video' ? '<div class="v-tag">VIDEO</div>' : ''}
+                            <img src="${item.url}" loading="lazy">
+                        </div>
+                    </div>`;
+            }
+            viewport.innerHTML = html;
+        }
+
+        // --- LIGHTBOX ENGINE ---
+        function openLB(index, direction = 'none') {
+            if (index < 0 || index >= mediaData.length) return;
+            const content = document.getElementById('lbContent');
+            const lb = document.getElementById('lightbox');
+            const idxEl = document.getElementById('lbIndex');
+            const oldMedia = content.querySelector('img, video');
+
+            if (oldMedia && direction !== 'none') {
+                oldMedia.classList.add(direction === 'next' ? 'slide-out-left' : 'slide-out-right');
+            }
+
+            idxEl.classList.add('pulse');
+            setTimeout(() => idxEl.classList.remove('pulse'), 200);
+
+            setTimeout(() => {
+                currentIndex = index;
+                const item = mediaData[index];
+                lb.style.display = 'flex';
+                idxEl.innerText = `${index + 1} / ${mediaData.length}`;
+                document.getElementById('lbCaption').innerText = item.caption || "";
+
+                const newMedia = item.type === 'video' ? document.createElement('video') : document.createElement('img');
+                newMedia.src = item.url;
+                newMedia.style.transform = 'scale(1)';
+                currentScale = 1;
+
+                if (item.type === 'video') { newMedia.controls = true; newMedia.autoplay = true; newMedia.loop = true; }
+                if (direction === 'next') newMedia.className = 'slide-in-from-right';
+                else if (direction === 'prev') newMedia.className = 'slide-in-from-left';
+
+                content.innerHTML = '';
+                content.appendChild(newMedia);
+
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        newMedia.style.transform = 'translateX(0) scale(1)';
+                        newMedia.style.opacity = '1';
+                    });
+                });
+                prefetch(index + 1); prefetch(index - 1);
+            }, direction === 'none' ? 0 : 50);
+        }
+
+        function closeLB() {
+            document.getElementById('lightbox').style.display = 'none';
+            document.getElementById('lbContent').innerHTML = '';
+        }
+
+        async function downloadMedia() {
+            const item = mediaData[currentIndex];
+            try {
+                const response = await fetch(item.url);
+                const blob = await response.blob();
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `memory-${Date.now()}`;
+                link.click();
+                showToast();
+            } catch (err) { window.open(item.url, '_blank'); }
+        }
+
+        function showToast() {
+            const toast = document.getElementById('saveToast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function prefetch(index) {
+            if (index >= 0 && index < mediaData.length) {
+                const img = new Image(); img.src = mediaData[index].url;
+            }
+        }
+
+        // --- INTERACTION HANDLERS ---
+        const lbContent = document.getElementById('lbContent');
+        lbContent.addEventListener('click', e => {
+            const now = Date.now();
+            const el = lbContent.querySelector('img, video');
+            if (!el) return;
+            if (now - lastTap < 300) {
+                if (el.classList.contains('smart-zoom')) {
+                    el.classList.remove('smart-zoom');
+                    el.style.transform = 'scale(1)';
+                    currentScale = 1;
+                } else {
+                    const rect = el.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    el.style.transformOrigin = `${x}% ${y}%`;
+                    el.classList.add('smart-zoom');
+                    currentScale = 3.5;
+                }
+            }
+            lastTap = now;
+        });
+
+        let touchStartX = 0;
+        lbContent.addEventListener('touchstart', e => {
+            if (e.touches.length === 2) {
+                startDist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+            } else { touchStartX = e.changedTouches[0].screenX; }
+        }, { passive: true });
+
+        lbContent.addEventListener('touchmove', e => {
+            const el = lbContent.querySelector('img, video');
+            if (!el || e.touches.length !== 2) return;
+            const dist = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY);
+            const zoomFactor = dist / startDist;
+            let newScale = currentScale * zoomFactor;
+            newScale = Math.min(Math.max(1, newScale), 5);
+            el.style.transition = 'none';
+            el.style.transform = `scale(${newScale})`;
+        }, { passive: false });
+
+        lbContent.addEventListener('touchend', e => {
+            const el = lbContent.querySelector('img, video');
+            if (!el) return;
+            if (e.touches.length < 2 && startDist > 0) {
+                const transform = window.getComputedStyle(el).getPropertyValue('transform');
+                const matrix = new DOMMatrix(transform);
+                currentScale = matrix.a;
+                startDist = 0;
+                el.style.transition = 'transform 0.45s cubic-bezier(0.15, 0.9, 0.34, 1)';
+                return;
+            }
+            if (currentScale <= 1.1) {
+                const diff = touchStartX - e.changedTouches[0].screenX;
+                if (Math.abs(diff) > 60) {
+                    diff > 0 ? openLB(currentIndex + 1, 'next') : openLB(currentIndex - 1, 'prev');
+                }
+            }
+        }, { passive: true });
+
+        document.addEventListener('keydown', e => {
+            if (document.getElementById('lightbox').style.display === 'flex') {
+                if (e.key === "ArrowRight") openLB(currentIndex + 1, 'next');
+                if (e.key === "ArrowLeft") openLB(currentIndex - 1, 'prev');
+                if (e.key === "Escape") closeLB();
+            }
+            if (document.getElementById('vault-auth').style.display !== 'none') {
+                if (e.key >= 0 && e.key <= 9) pressKey(e.key);
+                if (e.key === 'Backspace') pressKey('C');
+            }
+        });
+    </script>
+</body>
+
+</html>

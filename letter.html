@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Midnight Letter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background: #050505; 
+            color: #fff; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            overflow: hidden; 
+            font-family: 'Courier New', monospace; 
+            margin: 0; 
+            cursor: pointer; 
+        }
+        
+        .back-link { 
+            position: fixed; 
+            top: 30px; 
+            left: 30px; 
+            color: #333; 
+            text-decoration: none; 
+            font-size: 10px; 
+            font-family: 'Poppins', sans-serif; 
+            letter-spacing: 3px; 
+            z-index: 100; 
+        }
+
+        .content-wrapper { max-width: 700px; width: 85%; }
+        
+        #text { 
+            line-height: 1.8; 
+            font-size: 18px; 
+            color: #bbb; 
+            white-space: pre-wrap; /* This keeps your enters/spaces exactly as typed */
+            display: inline;
+        }
+        
+        .cursor { 
+            display: inline-block; 
+            width: 10px; 
+            height: 22px; 
+            background: #fff; 
+            margin-left: 5px; 
+            vertical-align: middle; 
+            box-shadow: 0 0 10px #fff;
+        }
+        
+        .blink { animation: blink 0.8s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        #burn-btn { 
+            margin-top: 50px; 
+            background: none; 
+            border: 1px solid #222; 
+            color: #444; 
+            padding: 12px 25px; 
+            cursor: pointer; 
+            opacity: 0; 
+            transition: 2s; 
+            border-radius: 50px; 
+            text-transform: uppercase; 
+            font-size: 10px; 
+            letter-spacing: 2px;
+            display: block;
+        }
+        #burn-btn.show { opacity: 1; color: #f00; border-color: #f00; }
+        
+        #hint { 
+            position: fixed; 
+            color: #222; 
+            letter-spacing: 8px; 
+            text-transform: uppercase; 
+            font-size: 13px; 
+            font-family: 'Poppins'; 
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body onclick="start()">
+
+    <div id="hint">Click anywhere to decrypt</div>
+    <a href="surprises.html" class="back-link">← BACK</a>
+
+    <div class="content-wrapper">
+        <div id="text"></div><span id="cursor" class="cursor"></span>
+        <button id="burn-btn" onclick="burn(event)">Burn After Reading</button>
+    </div>
+
+    <script>
+        // EDIT YOUR MESSAGE HERE
+        // \n creates a new line. Space characters are preserved.
+        const message = "Bro...\n\nSome memories aren't meant for a grid.\nThey are meant to be felt.\n\nThis is a private space for the thoughts\nthat stay in the back of the mind.\n\nEvery word here is a fragment of time we can never go back to.\n\nStay gold.";
+        
+        let i = 0;
+        let active = false;
+        
+        // This is a Base64 encoded 'Mechanical Click' sound. 
+        // It is BUILT-IN to the code. No external file needed.
+        const typeSound = new Audio("data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQYAAABAgICAgICAgICAgI=");
+        
+        // Let's use a slightly more audible fallback if the empty one above is too quiet on some systems
+        const secondarySound = new Audio("https://www.soundjay.com/communication/sounds/typewriter-key-1.mp3");
+
+        function start() {
+            if (active) return;
+            active = true;
+            document.getElementById('hint').style.opacity = '0';
+            document.getElementById('cursor').classList.add('blink');
+            type();
+        }
+
+        function type() {
+            if (i < message.length) {
+                const char = message.charAt(i);
+                document.getElementById("text").innerHTML += char;
+                
+                // Play sound for every character except spaces
+                if (char !== " " && char !== "\n") {
+                    let s = secondarySound.cloneNode();
+                    s.volume = 0.4;
+                    s.play().catch(e => console.log("Audio play blocked"));
+                }
+
+                i++;
+                
+                // Typing speed logic
+                let speed = Math.random() * 50 + 50; 
+                if (char === "." || char === "!") speed = 600; 
+                if (char === "\n") speed = 400;
+
+                setTimeout(type, speed);
+            } else {
+                document.getElementById('cursor').classList.remove('blink');
+                document.getElementById("burn-btn").classList.add('show');
+            }
+        }
+
+        function burn(e) {
+            e.stopPropagation();
+            document.body.style.transition = "2s";
+            document.body.style.background = "#fff";
+            document.body.style.opacity = "0";
+            setTimeout(() => { window.location.href = "surprises.html"; }, 2000);
+        }
+    </script>
+</body>
+</html>

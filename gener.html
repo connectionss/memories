@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Vault • Media Index</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+/* (UNCHANGED CSS — EXACTLY SAME AS YOURS) */
+:root{
+  --bg:#000;
+  --panel:#0b0b0b;
+  --border:#ffffff;
+  --soft:#2a2a2a;
+  --text:#fff;
+  --muted:#aaa;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  background:var(--bg);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
+  color:var(--text);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:24px;
+}
+.app{
+  width:100%;
+  max-width:900px;
+  background:var(--panel);
+  border:1px solid var(--soft);
+  border-radius:22px;
+  padding:32px;
+}
+h1{margin:0;font-size:26px;font-weight:900}
+.sub{margin-top:6px;font-size:12px;color:var(--muted)}
+.upload{
+  margin:28px 0;
+  min-height:140px;
+  border:2px dashed #fff;
+  border-radius:18px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  text-align:center;
+}
+.upload:hover{background:#050505}
+.upload strong{font-size:15px;margin-bottom:8px}
+.upload span{font-size:12px;color:var(--muted)}
+input[type=file]{display:none}
+.stats{display:flex;gap:14px;margin-bottom:22px}
+.stat{
+  flex:1;
+  border:1px solid var(--soft);
+  border-radius:14px;
+  padding:16px;
+  text-align:center;
+}
+.num{font-size:22px;font-weight:800}
+.label{margin-top:6px;font-size:10px;letter-spacing:1.5px;color:var(--muted)}
+.output{
+  position:relative;
+  height:360px;
+  border:1px solid var(--soft);
+  border-radius:18px;
+  background:#020202;
+  overflow:hidden;
+}
+pre{
+  margin:0;
+  padding:22px;
+  height:100%;
+  overflow-y:auto;
+  font-size:12px;
+  line-height:1.7;
+  white-space:pre-wrap;
+  cursor:pointer;
+}
+pre::-webkit-scrollbar{display:none}
+.progress{
+  position:absolute;
+  top:0;
+  right:0;
+  width:4px;
+  height:0;
+  background:#fff;
+}
+.toast{
+  position:fixed;
+  bottom:30px;
+  left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:#fff;
+  color:#000;
+  padding:12px 22px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:700;
+  transition:.35s cubic-bezier(.175,.885,.32,1.275);
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <h1>Vault Media Index</h1>
+  <div class="sub">Offline JSON generator</div>
+
+  <!-- 🔑 NEW: REPO NAME INPUT -->
+  <div style="margin-top:18px;">
+    <input id="repo" placeholder="Enter GitHub repo name (e.g. vault-media-1)"
+      style="
+        width:100%;
+        background:#000;
+        border:1px solid #2a2a2a;
+        border-radius:14px;
+        padding:14px;
+        color:#fff;
+        font-size:13px;
+        outline:none;
+      ">
+  </div>
+
+  <!-- UPLOAD BOX -->
+  <label class="upload">
+    <strong>Upload Media Folder</strong>
+    <span>Click to select the folder you uploaded to GitHub</span>
+    <input type="file" id="folder" webkitdirectory multiple>
+  </label>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="num" id="total">0</div>
+      <div class="label">FILES</div>
+    </div>
+    <div class="stat">
+      <div class="num" id="images">0</div>
+      <div class="label">IMAGES</div>
+    </div>
+    <div class="stat">
+      <div class="num" id="videos">0</div>
+      <div class="label">VIDEOS</div>
+    </div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="output">
+    <div class="progress" id="progress"></div>
+    <pre id="out">Click above to select folder…</pre>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const out=document.getElementById("out");
+const toast=document.getElementById("toast");
+const progress=document.getElementById("progress");
+const repoInput=document.getElementById("repo");
+
+let json="";
+
+folder.onchange=e=>{
+  if(!repoInput.value.trim()){
+    showToast("Enter repo name first");
+    return;
+  }
+
+  const BASE =
+    "https://cdn.jsdelivr.net/gh/connectionss/" +
+    repoInput.value.trim() +
+    "/media/";
+
+  const files=[...e.target.files];
+  let img=0,vid=0;
+
+  const data=files
+    .filter(f=>/\.(jpg|jpeg|png|webp|mp4)$/i.test(f.name))
+    .map(f=>{
+      const isVideo=/\.mp4$/i.test(f.name);
+      isVideo?vid++:img++;
+      return{
+        type:isVideo?"video":"image",
+        url:BASE+f.name
+      };
+    });
+
+  json=JSON.stringify(data,null,2);
+  out.textContent=json;
+
+  total.textContent=data.length;
+  images.textContent=img;
+  videos.textContent=vid;
+
+  showToast("Media indexed");
+};
+
+out.onclick=()=>{
+  if(!json) return;
+  navigator.clipboard.writeText(json);
+  showToast("JSON copied");
+};
+
+out.addEventListener("scroll",()=>{
+  const max=out.scrollHeight-out.clientHeight;
+  const pct=max>0?(out.scrollTop/max)*100:100;
+  progress.style.height=pct+"%";
+});
+
+function showToast(text){
+  toast.textContent=text;
+  toast.classList.add("show");
+  setTimeout(()=>toast.classList.remove("show"),2000);
+}
+</script>
+
+</body>
+</html>
